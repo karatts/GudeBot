@@ -65,6 +65,13 @@ export const TEST_COMMAND = {
   type: 1,
 };
 
+// Simple test command
+export const EMOTIONAL_SUPPORT_COMMAND = {
+  name: 'emotionalsupport',
+  description: 'Emotional support command',
+  type: 1,
+};
+
 // Command containing options
 export const CHALLENGE_COMMAND = {
   name: 'challenge',

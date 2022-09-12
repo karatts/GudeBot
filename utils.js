@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import fetch from 'node-fetch';
 import { verifyKey } from 'discord-interactions';
 
@@ -25,7 +24,7 @@ export async function DiscordRequest(endpoint, options) {
     headers: {
       Authorization: `Bot ${process.env.DISCORD_TOKEN}`,
       'Content-Type': 'application/json; charset=UTF-8',
-      'User-Agent': 'RubyBot (https://github.com/karatts/TOFRubyBot, 1.0.0)',
+      'User-Agent': 'DiscordBot (https://github.com/discord/discord-example-app, 1.0.0)'
     },
     ...options
   });
