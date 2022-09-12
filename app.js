@@ -19,6 +19,24 @@ import {
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
+const { User, Client, GatewayIntentBits, IntentsBitField, EmbedBuilder } = require('discord.js');
+const { token } = require('./config.json');
+
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMembers,
+  ],
+});
+
+client.once('ready', () => {
+  console.log(`Ready! Logged in as ${client.user.tag}`);
+});
+
+// Login to Discord with your client's token
+client.login(token);
 
 // Create an express app
 const app = express();
@@ -26,8 +44,6 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 // Parse request body and verifies incoming requests using discord-interactions package
 app.use(express.json({ verify: VerifyDiscordRequest(process.env.PUBLIC_KEY) }));
-//add Discord js
-const Discord = require('discord.js')
 
 // Store for in-progress games. In production, you'd want to use a DB
 const activeGames = {};
@@ -68,15 +84,31 @@ app.post('/interactions', async function (req, res) {
     // "emotionalsupport" guild command
     if (name === 'emotionalsupport') {
       // Send a message into the channel where command was triggered from
+      const client = new Client({
+        intents: [
+          GatewayIntentBits.Guilds,
+          GatewayIntentBits.GuildMessages,
+          GatewayIntentBits.MessageContent,
+          GatewayIntentBits.GuildMembers,
+        ],
+      });
+
+      const esEmbed = new EmbedBuilder()
+        .setColor(0xc55000)
+        .setTitle('Emotional Support')
+        .setAuthor({ name: 'Ruby', iconURL: 'https://imgur.com/9DJ6Bm9'})
+        .setDescription('I heard you needed some support.... it will be okay')
+        .setImage('https://tenor.com/view/kanna-kamui-pat-head-pat-gif-12018819')
       
-      const { AttachmentBuilder, EmbedBuilder } = require('discord.js');
+      console.log(req.body);
+      
+      let nickname = req.body.member.nick ? req.body.member.nick : req.body.member.user.username;
             
       return res.send({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
-          // Fetches a random emoji to send from a helper function
-          content: 'There there, it will all be okay ',
-        },
+          content: 'There there ' + nickname + ', everything will be okay.',
+        }
       });
     }
   }
@@ -89,6 +121,6 @@ app.listen(PORT, () => {
   HasGuildCommands(process.env.APP_ID, process.env.GUILD_ID, [
     TEST_COMMAND,
     EMOTIONAL_SUPPORT_COMMAND,
-    CHALLENGE_COMMAND,
+    CHALLENGE_COMMAND
   ]);
 });
