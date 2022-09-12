@@ -43,28 +43,6 @@ export async function InstallGuildCommand(appId, guildId, command) {
   }
 }
 
-// Get the game choices from game.js
-function createCommandChoices() {
-  const choices = getRPSChoices();
-  const commandChoices = [];
-
-  for (let choice of choices) {
-    commandChoices.push({
-      name: capitalize(choice),
-      value: choice.toLowerCase(),
-    });
-  }
-
-  return commandChoices;
-}
-
-// Simple test command
-export const TEST_COMMAND = {
-  name: 'test',
-  description: 'Basic guild command',
-  type: 1,
-};
-
 // Simple test command
 export const EMOTIONAL_SUPPORT_COMMAND = {
   name: 'emotionalsupport',
@@ -76,5 +54,12 @@ export const EMOTIONAL_SUPPORT_COMMAND = {
 export const PAT_COMMAND = {
   name: 'pat',
   description: 'pat command',
-  type: 1,
+  options: [
+    {
+      "type": 7,
+      "name": "user",
+      "description": "user to be used for pat command",
+      "required": false
+    }
+  ]
 };
