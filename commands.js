@@ -73,8 +73,8 @@ export const EMOTIONAL_SUPPORT_COMMAND = {
 };
 
 // Command containing options
-export const HEAD_PAT_COMMAND = {
+export const PAT_COMMAND = {
   name: 'pat',
-  description: 'Emotional support command',
+  description: 'pat command',
   type: 1,
 };

@@ -9,7 +9,7 @@ import {
 import { VerifyDiscordRequest, getRandomEmoji, DiscordRequest } from './utils.js';
 import { getShuffledOptions, getResult } from './game.js';
 import {
-  HEAD_PAT_COMMAND,
+  PAT_COMMAND,
   EMOTIONAL_SUPPORT_COMMAND,
   TEST_COMMAND,
   HasGuildCommands,
@@ -111,6 +111,15 @@ app.post('/interactions', async function (req, res) {
         }
       });
     }
+    
+    else {
+      return res.send({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          content: 'Ruby doesn\'t know what you want. Sorry\!' ,
+        }
+      });
+    }
   }
 });
 
@@ -121,6 +130,6 @@ app.listen(PORT, () => {
   HasGuildCommands(process.env.APP_ID, process.env.GUILD_ID, [
     TEST_COMMAND,
     EMOTIONAL_SUPPORT_COMMAND,
-    HEAD_PAT_COMMAND,
+    PAT_COMMAND,
   ]);
 });
