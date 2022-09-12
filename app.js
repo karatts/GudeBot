@@ -10,9 +10,15 @@ import { VerifyDiscordRequest, getRandomEmoji, DiscordRequest } from './utils.js
 import { getShuffledOptions, getResult } from './game.js';
 import {
   CHALLENGE_COMMAND,
+  EMOTIONAL_SUPPORT_COMMAND,
   TEST_COMMAND,
   HasGuildCommands,
 } from './commands.js';
+
+//create require
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+
 
 // Create an express app
 const app = express();
@@ -20,6 +26,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 // Parse request body and verifies incoming requests using discord-interactions package
 app.use(express.json({ verify: VerifyDiscordRequest(process.env.PUBLIC_KEY) }));
+//add Discord js
+const Discord = require('discord.js')
 
 // Store for in-progress games. In production, you'd want to use a DB
 const activeGames = {};
@@ -60,11 +68,14 @@ app.post('/interactions', async function (req, res) {
     // "emotionalsupport" guild command
     if (name === 'emotionalsupport') {
       // Send a message into the channel where command was triggered from
+      
+      const { AttachmentBuilder, EmbedBuilder } = require('discord.js');
+            
       return res.send({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
           // Fetches a random emoji to send from a helper function
-          content: 'Hi ' + getRandomEmoji(),
+          content: 'There there, it will all be okay ',
         },
       });
     }
@@ -77,6 +88,7 @@ app.listen(PORT, () => {
   // Check if guild commands from commands.json are installed (if not, install them)
   HasGuildCommands(process.env.APP_ID, process.env.GUILD_ID, [
     TEST_COMMAND,
+    EMOTIONAL_SUPPORT_COMMAND,
     CHALLENGE_COMMAND,
   ]);
 });
