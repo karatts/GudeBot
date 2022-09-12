@@ -9,7 +9,7 @@ import {
 import { VerifyDiscordRequest, getRandomEmoji, DiscordRequest } from './utils.js';
 import { getShuffledOptions, getResult } from './game.js';
 import {
-  CHALLENGE_COMMAND,
+  HEAD_PAT_COMMAND,
   EMOTIONAL_SUPPORT_COMMAND,
   TEST_COMMAND,
   HasGuildCommands,
@@ -84,30 +84,30 @@ app.post('/interactions', async function (req, res) {
     // "emotionalsupport" guild command
     if (name === 'emotionalsupport') {
       // Send a message into the channel where command was triggered from
-      const client = new Client({
-        intents: [
-          GatewayIntentBits.Guilds,
-          GatewayIntentBits.GuildMessages,
-          GatewayIntentBits.MessageContent,
-          GatewayIntentBits.GuildMembers,
-        ],
-      });
-
-      const esEmbed = new EmbedBuilder()
-        .setColor(0xc55000)
-        .setTitle('Emotional Support')
-        .setAuthor({ name: 'Ruby', iconURL: 'https://imgur.com/9DJ6Bm9'})
-        .setDescription('I heard you needed some support.... it will be okay')
-        .setImage('https://tenor.com/view/kanna-kamui-pat-head-pat-gif-12018819')
-      
-      console.log(req.body);
-      
       let nickname = req.body.member.nick ? req.body.member.nick : req.body.member.user.username;
             
       return res.send({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
           content: 'There there ' + nickname + ', everything will be okay.',
+        }
+      });
+    }
+    
+    // "pat" guild command
+    if (name === 'pat') {
+      // Send a message into the channel where command was triggered from
+      const esEmbed = new EmbedBuilder()
+        .setColor(0xc55000)
+        .setTitle('Emotional Support')
+        .setAuthor({ name: 'Ruby' })
+        .setDescription('I heard you needed some support.... it will be okay')
+        .setImage('https://i.imgur.com/RYg23Nz.gif')
+            
+      return res.send({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          embeds: [esEmbed],
         }
       });
     }
@@ -121,6 +121,6 @@ app.listen(PORT, () => {
   HasGuildCommands(process.env.APP_ID, process.env.GUILD_ID, [
     TEST_COMMAND,
     EMOTIONAL_SUPPORT_COMMAND,
-    CHALLENGE_COMMAND
+    HEAD_PAT_COMMAND,
   ]);
 });

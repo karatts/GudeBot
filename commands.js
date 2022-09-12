@@ -73,17 +73,8 @@ export const EMOTIONAL_SUPPORT_COMMAND = {
 };
 
 // Command containing options
-export const CHALLENGE_COMMAND = {
-  name: 'challenge',
-  description: 'Challenge to a match of rock paper scissors',
-  options: [
-    {
-      type: 3,
-      name: 'object',
-      description: 'Pick your object',
-      required: true,
-      choices: createCommandChoices(),
-    },
-  ],
+export const HEAD_PAT_COMMAND = {
+  name: 'pat',
+  description: 'Emotional support command',
   type: 1,
 };
