@@ -1,5 +1,5 @@
 {
-  "name": "discord-getting-started",
+  "name": "Ruby TOF FairyTail Bot",
   "version": "1.0.0",
   "description": "Basic Discord app using interactions",
   "main": "app.js",
@@ -7,16 +7,16 @@
   "scripts": {
     "start": "node app.js"
   },
-  "author": "Shay DeWael",
+  "author": "Kara Tong",
   "license": "MIT",
   "engines": {
     "node": "16.x"
   },
   "dependencies": {
     "discord-interactions": "^3.2.0",
-    "discord.js": "^14.3.0",
     "express": "^4.17.3",
-    "node-fetch": "^3.2.3"
+    "node-fetch": "^3.2.3",
+    "discord.js": "^14.3.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.15"
