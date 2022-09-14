@@ -1,4 +1,3 @@
-import { getRPSChoices } from './game.js';
 import { capitalize, DiscordRequest } from './utils.js';
 
 export async function HasGuildCommands(appId, guildId, commands) {
@@ -56,10 +55,24 @@ export const PAT_COMMAND = {
   description: 'pat command',
   options: [
     {
-      "type": 7,
+      "type": 6,
       "name": "user",
       "description": "user to be used for pat command",
       "required": false
+    }
+  ]
+};
+
+// Command containing options
+export const REPORT_COMMAND = {
+  name: 'report',
+  description: 'report command',
+  options: [
+    {
+      "type": 6,
+      "name": "user",
+      "description": "user to be reported",
+      "required": true
     }
   ]
 };
