@@ -10,7 +10,7 @@ import { VerifyDiscordRequest, getRandomEmoji, DiscordRequest } from './utils.js
 import {
   PAT_COMMAND,
   EMOTIONAL_SUPPORT_COMMAND,
-  REPORT_COMMAND,
+  REPORT_USER_COMMAND,
   HasGuildCommands,
 } from './commands.js';
 
@@ -104,19 +104,25 @@ app.post('/interactions', async function (req, res) {
     }
     
         // "emotionalsupport" guild command
-    if (name === 'report') {
-      // Send a message into the channel where command was triggered from
-      let ftuser = req.body.member.nick ? req.body.member.nick : req.body.member.user.username;
+    if (name === 'reportuser') {
       
-      //the option name is 'TEST' and the user inputted 'hey'
-      let option = req.body.data.options;
-      console.log(option);
-            
-      return res.send({
+      let ftUserId = req.body.data.options[0].value;
+      ftUserId = client.users.fetch(ftUserId);
+      console.log(req.body.guild_id)
+      const crewMember = client.fetchGuildPreview(req.body.guild_id);
+      console.log(crewMember);
+      
+      ftUserId.then(value => {
+        
+        console.log(value);
+        
+        return res.send({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
-          content: 'Testing.',
+          content: 'Are you sure you want to report ' + value.username + '?',
         }
+      });
+        
       });
     }
     
@@ -139,6 +145,6 @@ app.listen(PORT, () => {
   HasGuildCommands(process.env.APP_ID, process.env.GUILD_ID, [
     EMOTIONAL_SUPPORT_COMMAND,
     PAT_COMMAND,
-    REPORT_COMMAND,
+    REPORT_USER_COMMAND,
   ]);
 });

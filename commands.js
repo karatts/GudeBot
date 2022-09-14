@@ -64,8 +64,8 @@ export const PAT_COMMAND = {
 };
 
 // Command containing options
-export const REPORT_COMMAND = {
-  name: 'report',
+export const REPORT_USER_COMMAND = {
+  name: 'reportuser',
   description: 'report command',
   options: [
     {
