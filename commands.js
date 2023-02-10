@@ -1,4 +1,3 @@
-import { getRPSChoices } from './game.js';
 import { capitalize, DiscordRequest } from './utils.js';
 
 export async function HasGuildCommands(appId, guildId, commands) {
@@ -43,40 +42,37 @@ export async function InstallGuildCommand(appId, guildId, command) {
   }
 }
 
-// Get the game choices from game.js
-function createCommandChoices() {
-  const choices = getRPSChoices();
-  const commandChoices = [];
-
-  for (let choice of choices) {
-    commandChoices.push({
-      name: capitalize(choice),
-      value: choice.toLowerCase(),
-    });
-  }
-
-  return commandChoices;
-}
-
 // Simple test command
-export const TEST_COMMAND = {
-  name: 'test',
-  description: 'Basic guild command',
+export const EMOTIONAL_SUPPORT_COMMAND = {
+  name: 'emotionalsupport',
+  description: 'Emotional support command',
   type: 1,
 };
 
 // Command containing options
-export const CHALLENGE_COMMAND = {
-  name: 'challenge',
-  description: 'Challenge to a match of rock paper scissors',
+export const PAT_COMMAND = {
+  name: 'pat',
+  description: 'pat command',
   options: [
     {
-      type: 3,
-      name: 'object',
-      description: 'Pick your object',
-      required: true,
-      choices: createCommandChoices(),
-    },
-  ],
-  type: 1,
+      "type": 6,
+      "name": "user",
+      "description": "user to be used for pat command",
+      "required": false
+    }
+  ]
+};
+
+// Command containing options
+export const REPORT_USER_COMMAND = {
+  name: 'reportuser',
+  description: 'report command',
+  options: [
+    {
+      "type": 6,
+      "name": "user",
+      "description": "user to be reported",
+      "required": true
+    }
+  ]
 };

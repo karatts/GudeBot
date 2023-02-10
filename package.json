@@ -1,22 +1,28 @@
 {
-  "name": "RubyBot",
+  "name": "Ruby TOF FairyTail Bot",
   "version": "1.0.0",
-  "description": "",
+  "description": "Basic Discord app using interactions",
   "main": "app.js",
   "type": "module",
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js"
+    "start": "node app.js"
   },
-  "author": "Shay DeWael",
+  "author": "Kara Tong",
   "license": "MIT",
+  "engines": {
+    "node": "16.x"
+  },
   "dependencies": {
     "discord-interactions": "^3.2.0",
-    "dotenv": "^16.0.0",
-    "express": "^4.17.3",
-    "node-fetch": "^3.2.3"
+    "express": "^4.18.1",
+    "node-fetch": "^3.2.10",
+    "discord.js": "^14.3.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.15"
-  }
+  },
+  "keywords": [
+    "discord",
+    "node"
+  ]
 }
