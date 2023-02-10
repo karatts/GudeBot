@@ -1,10 +1,12 @@
-# TOF Ruby Discord Bot for FairyTail server
+# GudeBot for FairyTail server and private use
 
 This bot provides basic functions as requested by members of the FairyTail discord server.
 
 ## Functions
 - Emotional Support
 - Pat
+- Interaction with Karuta bot
+    - Event Interaction
 
 ## Project structure
 Below is a basic overview of the project structure:
