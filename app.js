@@ -103,8 +103,10 @@ app.post('/interactions', async function (req, res) {
       });
     }
     
-        // "emotionalsupport" guild command
-    if (name === 'reportuser') {
+        // "karuta vday event" command
+    if (name === 'kvday') {
+
+      
       
       let ftUserId = req.body.data.options[0].value;
       ftUserId = client.users.fetch(ftUserId);
