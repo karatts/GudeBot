@@ -156,11 +156,22 @@ app.post("/interactions", async function (req, res) {
       
       tracking.tracking.channel = channel;
       tracking.tracking.event = event;
+      
+
         
       const jsonString = JSON.stringify(tracking, null, 2);
       fs.writeFile('./track.json', jsonString, err => {
         if (err) return console.log(err);
       });
+      
+      if (event === "none"){
+        return res.send({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          data: {
+            content: "Tracking disabled",
+          },
+        });
+      }
 
       return res.send({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
