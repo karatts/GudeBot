@@ -1,4 +1,5 @@
 import { capitalize, DiscordRequest } from './utils.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
 
 export async function HasGuildCommands(appId, guildId, commands) {
   if (guildId === '' || appId === '') return;
@@ -22,7 +23,8 @@ async function HasGuildCommand(appId, guildId, command) {
         console.log(`Installing "${command['name']}"`);
         InstallGuildCommand(appId, guildId, command);
       } else {
-        console.log(`"${command['name']}" command already installed`);
+        InstallGuildCommand(appId, guildId, command);
+        console.log(`"${command['name']}" command already installed but update anyways`);
       }
     }
   } catch (err) {
@@ -49,30 +51,31 @@ export const EMOTIONAL_SUPPORT_COMMAND = {
   type: 1,
 };
 
-// Command containing options
 export const PAT_COMMAND = {
   name: 'pat',
   description: 'pat command',
-  options: [
-    {
-      "type": 6,
-      "name": "user",
-      "description": "user to be used for pat command",
-      "required": false
-    }
-  ]
+  type: 1,
 };
 
-// Command containing options
-export const REPORT_USER_COMMAND = {
-  name: 'reportuser',
-  description: 'report command',
+export const CRY_COMMAND = {
+  name: 'cry',
+  description: 'cry command',
   options: [
     {
-      "type": 6,
-      "name": "user",
-      "description": "user to be reported",
-      "required": true
+      "type": 3,
+      "name": "event",
+      "description": "Event to track",
+      "required": true,
+      "choices": [
+        {
+          "name": "vday",
+          "value": "vday"
+        },
+        {
+          "name": "none",
+          "value": "none"
+        }
+      ]
     }
   ]
 };
