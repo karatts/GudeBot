@@ -3,12 +3,14 @@
 This bot provides basic functions as requested by members of the FairyTail discord server.
 
 ## Functions
+
 - Emotional Support
 - Pat
 - Interaction with Karuta bot
-    - Event Interaction
+  - Event Interaction
 
 ## Project structure
+
 Below is a basic overview of the project structure:
 
 ```
@@ -17,10 +19,9 @@ Below is a basic overview of the project structure:
 │   ├── command.js
 │   ├── modal.js
 │   ├── selectMenu.js
-├── .env.sample -> sample .env file
+├── .env -> .env file
 ├── app.js      -> main entrypoint for app
 ├── commands.js -> slash command payloads + helpers
-├── game.js     -> logic specific to RPS
 ├── utils.js    -> utility functions and enums
 ├── package.json
 ├── README.md
