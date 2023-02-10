@@ -25,6 +25,7 @@ const require = createRequire(import.meta.url);
 
 const {
   Client,
+  Events,
   GatewayIntentBits,
   IntentsBitField,
   EmbedBuilder,
@@ -49,8 +50,22 @@ client.once("ready", () => {
   console.log(tracking);
 });
 
-client.on("message", (message) => {
-  console.log(message);
+client.on(Events.InteractionCreate, async interaction => {
+	if (!interaction.isChatInputCommand()) return;
+
+	const command = interaction.client.commands.get(interaction.commandName);
+
+	if (!command) {
+		console.error(`No command matching ${interaction.commandName} was found.`);
+		return;
+	}
+
+	try {
+		await command.execute(interaction);
+	} catch (error) {
+		console.error(`Error executing ${interaction.commandName}`);
+		console.error(error);
+	}
 });
 
 // Login to Discord with your client's token
