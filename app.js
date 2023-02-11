@@ -44,7 +44,7 @@ const client = new Client({
 });
 
 var tracking;
-const karutaUID = 646937666251915264; //karuta bot id
+const karutaUID = '646937666251915264'; //karuta bot id
 
 client.once("ready", () => {
   console.log(`Ready! Logged in as ${client.user.tag}`);
@@ -56,21 +56,19 @@ client.once("ready", () => {
 // console.log(channel);
 
 client.on("messageCreate", (message) => {
-  if(message.author.id === '646937666251915264' && (message.channelId === tracking.tracking.channel) && (tracking.tracking.event === 'vday')){
+  if(message.author.id === '646937666251915264' && (message.channelId === tracking.tracking.channel) && (tracking.tracking.event === 'vday') && (message.content.includes('dropping'))){
+    console.log('Looking at message...');
     const channel = message.client.channels.cache.find(channel => channel.id === tracking.tracking.channel);
     
-    const reactor = message.author.id;
-    //channel.send('hi <@&1073409722335633490>'); // blossom
-    //channel.send('hi <@&1073409614625914940>'); // rose
-    //channel.send('hi <@&1073409651850350622>'); // sunflower
-    //channel.send('hi <@&1073409677376880742>'); // tulip
-    
     const filter = (reaction, user) => {
-        console.log(user)
-          return ['🌼','🌹','💐','🌻','🌷'].includes(reaction.emoji.name) && user.id === karutaUID;
+        console.log(user);
+        console.log('User ID '+ user.id);
+        console.log('Karuta ID ' + karutaUID);
+        console.log(user.id === karutaUID);
+        return ['🌼','🌹','💐','🌻','🌷'].includes(reaction.emoji.name) && user.id === karutaUID;
     };
 
-    message.awaitReactions({ filter, max: 5, time: 10000, errors: ['time'] })
+    message.awaitReactions({ filter, max: 5, time: 5000, errors: ['time'] })
         .then(collected => console.log('Collecting things...'))
         .catch(collected => {
           console.log('reactions claimed');
@@ -78,23 +76,26 @@ client.on("messageCreate", (message) => {
             switch(collected.first().emoji.name) {
               case '🌼':
                 channel.send('A <@&1073409722335633490> has dropped!')
-                //channel.send('Blossom has dropped!')
+                console.log('Blossom has dropped!')
                 break;
               case '🌹':
                 channel.send('A <@&1073409614625914940> has dropped!')
-                //channel.send('Rose has dropped!')
+                console.log('Rose has dropped!')
                 break;
               case '🌻':
                 channel.send('A <@&1073409651850350622> has dropped!')
-                //channel.send('Sunflower has dropped!')
+                console.log('Sunflower has dropped!')
                 break;
               case '🌷':
                 channel.send('A <@&1073409677376880742> has dropped!')
-                //channel.send('Tulip has dropped!')
+                console.log('Tulip has dropped!')
                 break;
               default:
                 channel.send('A bouquet of <@&1073409677376880742>s, <@&1073409722335633490>s, <@&1073409614625914940>s,and <@&1073409651850350622>s has dropped!')
               }
+          } else {
+            console.log('All loaded');
+            //channel.send('There\'s no flowers');
           }
         });
    }
@@ -174,6 +175,7 @@ app.post("/interactions", async function (req, res) {
     if (name === "track") {
       let channel = req.body.channel_id;
       let event = req.body.data.options[0].value;
+      console.log(event);
             
       if (tracking.tracking.event === event && channel === tracking.tracking.channel){
         return res.send({
