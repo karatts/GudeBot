@@ -56,7 +56,7 @@ client.once("ready", () => {
 // console.log(channel);
 
 client.on("messageCreate", (message) => {
-  if(message.author.id === '646937666251915264' && (message.channelId === tracking.tracking.channel)){
+  if(message.author.id === '646937666251915264' && (message.channelId === tracking.tracking.channel) && (tracking.tracking.event === 'vday')){
     const channel = message.client.channels.cache.find(channel => channel.id === tracking.tracking.channel);
     
     const reactor = message.author.id;
