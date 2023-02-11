@@ -22,7 +22,7 @@ async function HasGuildCommand(appId, guildId, command) {
       if (!installedNames.includes(command['name'])) {
         console.log(`Installing "${command['name']}"`);
         InstallGuildCommand(appId, guildId, command);
-      } else {
+      }  else {
         InstallGuildCommand(appId, guildId, command);
         console.log(`"${command['name']}" command already installed but update anyways`);
       }
@@ -57,9 +57,10 @@ export const PAT_COMMAND = {
   type: 1,
 };
 
-export const CRY_COMMAND = {
-  name: 'cry',
-  description: 'cry command',
+export const TRACK_COMMAND = {
+  name: 'track',
+  description: 'track command',
+  "default_member_permissions": "0",
   options: [
     {
       "type": 3,
