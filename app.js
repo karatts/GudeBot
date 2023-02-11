@@ -14,7 +14,7 @@ import {
 import {
   PAT_COMMAND,
   EMOTIONAL_SUPPORT_COMMAND,
-  CRY_COMMAND,
+  TRACK_COMMAND,
   HasGuildCommands,
 } from "./commands.js";
 import fs from 'fs';
@@ -39,33 +39,66 @@ const client = new Client({
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildMessageReactions
   ],
 });
 
 var tracking;
+const karutaUID = '646937666251915264'; //karuta bot id
 
 client.once("ready", () => {
   console.log(`Ready! Logged in as ${client.user.tag}`);
   tracking = JSON.parse(fs.readFileSync('./track.json'));
-  console.log(tracking);
 });
 
-client.on(Events.InteractionCreate, async interaction => {
-	if (!interaction.isChatInputCommand()) return;
+// console.log(tracking.tracking.channel);
+// const channel = client.channels.cache.find(tracking.tracking.channel);
+// console.log(channel);
 
-	const command = interaction.client.commands.get(interaction.commandName);
+client.on("messageCreate", (message) => {
+  if(message.author.id === '646937666251915264' && (message.channelId === tracking.tracking.channel) && (tracking.tracking.event === 'vday') && (message.content.includes('dropping'))){
+    console.log('Looking at message...');
+    const channel = message.client.channels.cache.find(channel => channel.id === tracking.tracking.channel);
+    
+    const filter = (reaction, user) => {
+        console.log(user);
+        console.log('User ID '+ user.id);
+        console.log('Karuta ID ' + karutaUID);
+        console.log(user.id === karutaUID);
+        return ['🌼','🌹','💐','🌻','🌷'].includes(reaction.emoji.name) && user.id === karutaUID;
+    };
 
-	if (!command) {
-		console.error(`No command matching ${interaction.commandName} was found.`);
-		return;
-	}
-
-	try {
-		await command.execute(interaction);
-	} catch (error) {
-		console.error(`Error executing ${interaction.commandName}`);
-		console.error(error);
-	}
+    message.awaitReactions({ filter, max: 5, time: 5000, errors: ['time'] })
+        .then(collected => console.log('Collecting things...'))
+        .catch(collected => {
+          console.log('reactions claimed');
+          if(collected.first()){
+            switch(collected.first().emoji.name) {
+              case '🌼':
+                channel.send('A <@&1073409722335633490> has dropped!')
+                console.log('Blossom has dropped!')
+                break;
+              case '🌹':
+                channel.send('A <@&1073409614625914940> has dropped!')
+                console.log('Rose has dropped!')
+                break;
+              case '🌻':
+                channel.send('A <@&1073409651850350622> has dropped!')
+                console.log('Sunflower has dropped!')
+                break;
+              case '🌷':
+                channel.send('A <@&1073409677376880742> has dropped!')
+                console.log('Tulip has dropped!')
+                break;
+              default:
+                channel.send('A bouquet of <@&1073409677376880742>s, <@&1073409722335633490>s, <@&1073409614625914940>s,and <@&1073409651850350622>s has dropped!')
+              }
+          } else {
+            console.log('All loaded');
+            //channel.send('There\'s no flowers');
+          }
+        });
+   }
 });
 
 // Login to Discord with your client's token
@@ -77,8 +110,6 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 // Parse request body and verifies incoming requests using discord-interactions package
 app.use(express.json({ verify: VerifyDiscordRequest(process.env.PUBLIC_KEY) }));
-
-const karutaUID = 646937666251915264;
 
 /**
  * Interactions endpoint URL where Discord will send HTTP requests
@@ -141,9 +172,10 @@ app.post("/interactions", async function (req, res) {
       });
     }
 
-    if (name === "cry") {
+    if (name === "track") {
       let channel = req.body.channel_id;
       let event = req.body.data.options[0].value;
+      console.log(event);
             
       if (tracking.tracking.event === event && channel === tracking.tracking.channel){
         return res.send({
@@ -156,11 +188,20 @@ app.post("/interactions", async function (req, res) {
       
       tracking.tracking.channel = channel;
       tracking.tracking.event = event;
-        
+
       const jsonString = JSON.stringify(tracking, null, 2);
       fs.writeFile('./track.json', jsonString, err => {
         if (err) return console.log(err);
       });
+      
+      if (event === "none"){
+        return res.send({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          data: {
+            content: "Tracking disabled",
+          },
+        });
+      }
 
       return res.send({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -192,6 +233,7 @@ app.post("/interactions", async function (req, res) {
     //       });
     //     }
     else {
+      
       return res.send({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
@@ -208,6 +250,6 @@ app.listen(PORT, () => {
   HasGuildCommands(process.env.APP_ID, process.env.GUILD_ID, [
     EMOTIONAL_SUPPORT_COMMAND,
     PAT_COMMAND,
-    CRY_COMMAND,
+    TRACK_COMMAND,
   ]);
 });
