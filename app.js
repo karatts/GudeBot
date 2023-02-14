@@ -43,63 +43,64 @@ const client = new Client({
   ],
 });
 
-var tracking;
 const karutaUID = '646937666251915264'; //karuta bot id
+
+let tracking;
 
 client.once("ready", () => {
   console.log(`Ready! Logged in as ${client.user.tag}`);
   tracking = JSON.parse(fs.readFileSync('./track.json'));
 });
 
-// console.log(tracking.tracking.channel);
-// const channel = client.channels.cache.find(tracking.tracking.channel);
+// console.log(tracking.tracking.channel); tracking[0]
+// let tracking = client.channels.cache.find(tracking.tracking.channel);
 // console.log(channel);
 
-// client.on("messageCreate", (message) => {
-//   if(message.author.id === '646937666251915264' && (message.channelId === tracking.tracking.channel) && (tracking.tracking.event === 'vday') && (message.content.includes('dropping'))){
-//     console.log('Looking at message...');
-//     const channel = message.client.channels.cache.find(channel => channel.id === tracking.tracking.channel);
-    
-//     const filter = (reaction, user) => {
-//         console.log(user);
-//         console.log('User ID '+ user.id);
-//         console.log('Karuta ID ' + karutaUID);
-//         console.log(user.id === karutaUID);
-//         return ['🌼','🌹','💐','🌻','🌷'].includes(reaction.emoji.name) && user.id === karutaUID;
-//     };
+//let trackedChannels = Object.keys(tracking);
 
-//     message.awaitReactions({ filter, max: 5, time: 5000, errors: ['time'] })
-//         .then(collected => console.log('Collecting things...'))
-//         .catch(collected => {
-//           console.log('reactions claimed');
-//           if(collected.first()){
-//             switch(collected.first().emoji.name) {
-//               case '🌼':
-//                 channel.send('A <@&1073409722335633490> has dropped!')
-//                 console.log('Blossom has dropped!')
-//                 break;
-//               case '🌹':
-//                 channel.send('A <@&1073409614625914940> has dropped!')
-//                 console.log('Rose has dropped!')
-//                 break;
-//               case '🌻':
-//                 channel.send('A <@&1073409651850350622> has dropped!')
-//                 console.log('Sunflower has dropped!')
-//                 break;
-//               case '🌷':
-//                 channel.send('A <@&1073409677376880742> has dropped!')
-//                 console.log('Tulip has dropped!')
-//                 break;
-//               default:
-//                 channel.send('A bouquet of <@&1073409677376880742>s, <@&1073409722335633490>s, <@&1073409614625914940>s,and <@&1073409651850350622>s has dropped!')
-//               }
-//           } else {
-//             console.log('All loaded');
-//             //channel.send('There\'s no flowers');
-//           }
-//         });
-//    }
-// });
+client.on("messageCreate", (message) => {
+  let trackedChannels = Object.keys(tracking);
+  if(message.author.id === karutaUID && (trackedChannels.includes(message.channelId)) && (message.content.includes('dropping'))){
+    console.log('Looking at specified channels...');
+    const channel = message.client.channels.cache.find(channel => channel.id);
+
+    if(tracking[message.channelId].event === 'vday'){
+      console.log('This channel is being tracked for vday');
+        
+      const filter = (reaction, user) => {
+        return ['🌼','🌹','💐','🌻','🌷'].includes(reaction.emoji.name) && user.id === karutaUID;
+      };
+        
+      message.awaitReactions({ filter, max: 6, time: 5500, errors: ['time'] })
+        .then(collected => console.log('Collecting reactions...'))
+        .catch(collected => {
+          for(let i=0; i<collected.keys.length;i++){
+            switch(collected[i].emoji.name) {
+              case '🌼':
+                channel.send('A <@&1073409722335633490> has dropped!')
+                console.log('Blossom has dropped!')
+                break;
+              case '🌹':
+                channel.send('A <@&1073409614625914940> has dropped!')
+                console.log('Rose has dropped!')
+                break;
+              case '🌻':
+                channel.send('A <@&1073409651850350622> has dropped!')
+                console.log('Sunflower has dropped!')
+                break;
+              case '🌷':
+                channel.send('A <@&1073409677376880742> has dropped!')
+                console.log('Tulip has dropped!')
+                break;
+              default:
+                channel.send('A bouquet of <@&1073409677376880742>s, <@&1073409722335633490>s, <@&1073409614625914940>s,and <@&1073409651850350622>s has dropped!')
+            }
+          }
+          console.log('All reactions loaded');
+        });
+      }
+  }
+});
 
 // Login to Discord with your client's token
 client.login(token);
@@ -209,7 +210,8 @@ app.post("/interactions", async function (req, res) {
       let eventChange = false;
       let wlChange = false;
       
-      for(let i = 0; i < req.body.data.options.keys().length; i++){
+      for(let i = 0; i < req.body.data.options.length; i++){
+
         let filter = req.body.data.options[i].name;
 
         switch(filter) {
@@ -238,19 +240,23 @@ app.post("/interactions", async function (req, res) {
         // The channel is already being tracked - Just update the values
         if(eventChange){
           if (event === tracking[channel].event){
+             console.log("Event specified is already being tracked; No change");
             // Event specified is already being tracked; No change
             eventChange = false;
           } else {
             // Update event to new setting
+            console.log("Update event to new setting");
             tracking[channel].event = event;
           }
         }
         if(wlChange){
           if (wishlist === tracking[channel].wishlist){
             // Wishlist setting already set
+            console.log("No change to wishlist warning setting");
             wlChange = false;
           } else {
             // Update wishlist setting
+            console.log("Update wishlist warning setting");
             tracking[channel].wishlist = wishlist;
           }
         }
@@ -262,40 +268,28 @@ app.post("/interactions", async function (req, res) {
         }
       }
       
+      let returnMessage;
+      if (wlChange && eventChange){
+        returnMessage = "The settings for event and wishlist tracking have been updated for this channel.";
+      } else if(wlChange) {
+        returnMessage = "The settings for wishlist warnings have been updated for this channel.";
+      } else if(eventChange){
+        returnMessage = "The settings for event tracking has been updated for this channel.";
+      } else {
+        returnMessage = "Tracking settings for this channel already match the specified settings.";
+      }
+      
       const jsonString = JSON.stringify(tracking, null, 2); // write to file
       fs.writeFile('./track.json', jsonString, err => {
         if (err) return console.log(err);
       });
             
-      if (wlChange && eventChange){ //Both settings for wishlist and event have changed
-        return res.send({
+      return res.send({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            content: "The settings for event and wishlist tracking have been updated for this channel.",
-          },
-        });
-      } else if(wlChange) { // Only wishlist setting changed
-        return res.send({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            content: "The settings for wishlist warnings have been updated for this channel.",
-          },
-        });
-      } else if(eventChange){ // Only event setting changed
-        return res.send({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            content: "The settings for event tracking has been updated for this channel.",
-          },
-        });
-      } else { // Nothing changed
-        return res.send({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            content: "Tracking settings for this channel already match the specified settings.",
-          },
-        });
-      }
+        data: {
+          content: returnMessage,
+        },
+      });
     }
 
     // "custom report" command
