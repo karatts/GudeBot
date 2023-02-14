@@ -66,15 +66,31 @@ export const TRACK_COMMAND = {
       "type": 3,
       "name": "event",
       "description": "Event to track",
-      "required": true,
+      "required": false,
       "choices": [
         {
-          "name": "vday",
+          "name": "Valentine's Event",
           "value": "vday"
         },
         {
-          "name": "none",
+          "name": "No Event",
           "value": "none"
+        }
+      ]
+    },
+    {
+      "type": 3,
+      "name": "wishlist",
+      "description": "Wishlist Warning",
+      "required": false,
+      "choices": [
+        {
+          "name": "Wishlist On",
+          "value": "enabled"
+        },
+        {
+          "name": "Wishlist Off",
+          "value": "disabled"
         }
       ]
     }
