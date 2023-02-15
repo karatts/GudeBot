@@ -93,6 +93,22 @@ export const TRACK_COMMAND = {
           "value": "disabled"
         }
       ]
+    },
+    {
+      "type": 3,
+      "name": "testing",
+      "description": "Tester Channel",
+      "required": false,
+      "choices": [
+        {
+          "name": "Testing On",
+          "value": "enabled"
+        },
+        {
+          "name": "Testing Off",
+          "value": "disabled"
+        }
+      ]
     }
   ]
 };
