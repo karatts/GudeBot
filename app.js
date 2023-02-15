@@ -52,53 +52,72 @@ client.once("ready", () => {
   tracking = JSON.parse(fs.readFileSync('./track.json'));
 });
 
-// console.log(tracking.tracking.channel); tracking[0]
-// let tracking = client.channels.cache.find(tracking.tracking.channel);
-// console.log(channel);
-
-//let trackedChannels = Object.keys(tracking);
-
 client.on("messageCreate", (message) => {
   let trackedChannels = Object.keys(tracking);
-  if(message.author.id === karutaUID && (trackedChannels.includes(message.channelId)) && (message.content.includes('dropping'))){
-    console.log('Looking at specified channels...');
+  if(message.author.id === karutaUID && trackedChannels.includes(message.channelId)){
+    console.log('Looking at a tracked channel ' + message.channelId);
     const channel = message.client.channels.cache.find(channel => channel.id);
-
-    if(tracking[message.channelId].event === 'vday'){
-      console.log('This channel is being tracked for vday');
+    
+    if((tracking[message.channelId].event === 'vday') && message.content.includes('dropping')){
+      console.log('Vday tracking on...');
         
       const filter = (reaction, user) => {
         return ['🌼','🌹','💐','🌻','🌷'].includes(reaction.emoji.name) && user.id === karutaUID;
       };
         
-      message.awaitReactions({ filter, max: 6, time: 5500, errors: ['time'] })
-        .then(collected => console.log('Collecting reactions...'))
+      message.awaitReactions({ filter, max: 6, time: 5000, errors: ['time'] })
+        .then(collected => {
+          console.log('Collecting...');
+        })
         .catch(collected => {
-          for(let i=0; i<collected.keys.length;i++){
-            switch(collected[i].emoji.name) {
+          for (let [key, value] of collected) {
+            //console.log(key + " = " + value);
+            switch(key) {
               case '🌼':
-                channel.send('A <@&1073409722335633490> has dropped!')
+                message.channel.send('A <@&1073409722335633490> has dropped!')
                 console.log('Blossom has dropped!')
                 break;
               case '🌹':
-                channel.send('A <@&1073409614625914940> has dropped!')
+                message.channel.send('A <@&1073409614625914940> has dropped!')
                 console.log('Rose has dropped!')
                 break;
               case '🌻':
-                channel.send('A <@&1073409651850350622> has dropped!')
+                message.channel.send('A <@&1073409651850350622> has dropped!')
                 console.log('Sunflower has dropped!')
                 break;
               case '🌷':
-                channel.send('A <@&1073409677376880742> has dropped!')
+                message.channel.send('A <@&1073409677376880742> has dropped!')
                 console.log('Tulip has dropped!')
                 break;
               default:
-                channel.send('A bouquet of <@&1073409677376880742>s, <@&1073409722335633490>s, <@&1073409614625914940>s,and <@&1073409651850350622>s has dropped!')
+                message.channel.send('A bouquet of <@&1073409677376880742>s, <@&1073409722335633490>s, <@&1073409614625914940>s,and <@&1073409651850350622>s has dropped!')
             }
           }
-          console.log('All reactions loaded');
-        });
-      }
+        console.log('All reactions loaded');
+      });
+    }
+    // && message.content.includes('A card from your wishlist is dropping!'
+//     if(tracking[message.channelId].wishlist === 'enabled' && message.content.includes('A card from your wishlist is dropping')){
+//       setTimeout(() => {
+//         const filter = (reaction) => {
+//           return ['1️⃣','2️⃣','3️⃣','4️⃣'].includes(reaction.emoji.name);
+//         };
+        
+//         message.awaitReactions({ filter, max: 4, time: 5500, errors: ['time'] })
+//           .then(collected => console.log(collected))
+//           .catch(collected => {
+//             for(let i=0; i<collected.keys.length;i++){
+//               // do nothing
+//             }
+//           });
+//       }, 65000);
+//       setTimeout(() => {
+//         message.channel.send('**__DO NOT TOUCH THE WISHLISTED CARD UNLESS YOU ARE THE PINGED WISHLISTER__** \n > If you take the wishlisted card from the wishlister, you will be temp banned from all gambling channels for 24 hours. \n\n **__DO NOT TOUCH THE WISHLISTED CARD UNLESS YOU ARE THE PINGED WISHLISTER__**')
+//       }, 5000);
+//       setTimeout(() => {
+//         message.channel.send('A drop is expiring');
+//       }, 55000); // 55000
+//     }
   }
 });
 
@@ -133,7 +152,7 @@ app.post("/interactions", async function (req, res) {
   if (type === InteractionType.APPLICATION_COMMAND) {
     const { name } = data;
 
-    console.log(req.body);
+    //console.log(req.body);
 
     // "emotionalsupport" guild command
     if (name === "emotionalsupport") {
