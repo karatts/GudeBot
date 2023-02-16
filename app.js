@@ -46,15 +46,23 @@ const client = new Client({
 const karutaUID = '646937666251915264'; //karuta bot id
 
 let tracking;
+let tempBanned;
 
 const wishlistExpire = new EmbedBuilder()
   .setColor(0xeed202)
-  .setDescription('** The wishlisted drop is expiring. If the wishlister has not grabbed it yet, please grab the card for them. **')
+  .setDescription('** The wishlisted drop is expiring in 5 seconds. If the wishlister has not grabbed it yet, please grab the card for them. **')
 
 client.once("ready", () => {
   console.log(`Ready! Logged in as ${client.user.tag}`);
   tracking = JSON.parse(fs.readFileSync('./track.json'));
+  tempBanned = JSON.parse(fs.readFileSync('./temp-banned.json'));
 });
+
+// client.on("guildMemberUpdate", (member) => {
+//   console.log(member.user.id);
+//   console.log('Has roles:');
+//   console.log(member.roles.cache);
+// });
 
 client.on("messageCreate", (message) => {
   let trackedChannels = Object.keys(tracking);
@@ -81,10 +89,13 @@ client.on("messageCreate", (message) => {
       
       setTimeout(() => {
         message.channel.send({embeds: [wishlistWarning]});
-      }, 5000);
+      }, 500);
+      setTimeout(() => {
+        message.channel.send({embeds: [wishlistWarning]});
+      }, 3000);
       setTimeout(() => {
         message.channel.send({embeds: [wishlistExpire]});
-      }, 55000); // 55000
+      }, 52500); 
     }
   }
   
