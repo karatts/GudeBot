@@ -3,11 +3,14 @@
 This bot provides basic functions as requested by members of the FairyTail discord server.
 
 ## Functions
-
+For fun:
 - Emotional Support
 - Pat
-- Interaction with Karuta bot
-  - Event Interaction
+
+
+Interaction with Karuta bot:
+  - Event Tracker
+    -- Tracks messages sent in "tracked" channels to notify about event reactions on posts made by the bot.
 
 ## Project structure
 
