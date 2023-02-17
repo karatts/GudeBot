@@ -8,14 +8,12 @@ import {
 } from "discord-interactions";
 import {
   VerifyDiscordRequest,
-  getRandomEmoji,
   DiscordRequest,
 } from "./utils.js";
 import {
   PAT_COMMAND,
   EMOTIONAL_SUPPORT_COMMAND,
   TRACK_COMMAND,
-  HasGuildCommands,
 } from "./commands.js";
 import fs from 'fs';
 
@@ -415,9 +413,9 @@ app.post("/interactions", async function (req, res) {
 app.listen(PORT, () => {
   console.log("Listening on port", PORT);
   // Check if guild commands from commands.json are installed (if not, install them)
-  HasGuildCommands(process.env.APP_ID, process.env.GUILD_ID, [
-    EMOTIONAL_SUPPORT_COMMAND,
-    PAT_COMMAND,
-    TRACK_COMMAND,
-  ]);
+  // HasGuildCommands(process.env.APP_ID, process.env.GUILD_ID, [
+  //   EMOTIONAL_SUPPORT_COMMAND,
+  //   PAT_COMMAND,
+  //   TRACK_COMMAND,
+  // ]);
 });

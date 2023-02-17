@@ -1,4 +1,4 @@
-import { capitalize, DiscordRequest } from './utils.js';
+import { DiscordRequest } from './utils.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
 export async function HasGuildCommands(appId, guildId, commands) {
@@ -44,7 +44,6 @@ export async function InstallGuildCommand(appId, guildId, command) {
   }
 }
 
-// Simple test command
 export const EMOTIONAL_SUPPORT_COMMAND = {
   name: 'emotionalsupport',
   description: 'Emotional support command',
@@ -56,6 +55,38 @@ export const PAT_COMMAND = {
   description: 'pat command',
   type: 1,
 };
+
+export const TEST_COMMAND = {
+  name: 'test',
+  description: 'Testing command', 
+  "default_member_permissions": "0",
+  options: [
+    {
+      "type": 3,
+      "name": "event",
+      "description": "Event to track",
+      "required": true,
+      "choices": [
+        {
+          "name": "Valentine's Event",
+          "value": "vday"
+        }
+      ]
+    },
+    {
+      "type": '',
+      "name": "emote",
+      "description": "Emote to look for",
+      "required": true
+    },
+    {
+      "type": 8,
+      "name": "role",
+      "description": "Role to ping",
+      "required": true
+    }
+  ]
+}
 
 export const TRACK_COMMAND = {
   name: 'track',
