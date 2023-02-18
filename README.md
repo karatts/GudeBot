@@ -30,3 +30,7 @@ Below is a basic overview of the project structure:
 ├── README.md
 └── .gitignore
 ```
+
+## Dev Notes
+
+Run `node deploy-commands.js` in the project directory to register the commands.

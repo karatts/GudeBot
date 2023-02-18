@@ -8,24 +8,19 @@ import {
 } from "discord-interactions";
 import {
   VerifyDiscordRequest,
-  getRandomEmoji,
   DiscordRequest,
 } from "./utils.js";
-import {
-  PAT_COMMAND,
-  EMOTIONAL_SUPPORT_COMMAND,
-  TRACK_COMMAND,
-  HasGuildCommands,
-} from "./commands.js";
-import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-//create require
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
+import { createRequire } from "module"; // Bring in the ability to create the 'require' method
+const require = createRequire(import.meta.url); // construct the require method
 
+const fs = require('node:fs');
 const {
   Client,
   Events,
+  Collection,
   GatewayIntentBits,
   IntentsBitField,
   EmbedBuilder,
@@ -33,38 +28,59 @@ const {
 } = require("discord.js");
 const { token } = require("./config.json");
 
-const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.GuildMessageReactions
-  ],
-});
+const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+client.commands = new Collection();
+const commandsPath = path.join(__dirname, 'commands');
+const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+
+for (const file of commandFiles) {
+	const filePath = path.join(commandsPath, file);
+	//const command = require(filePath);
+  (async() => {
+    const command = await import(filePath);
+    console.log(command);
+    client.commands.set(command.data.name, command);
+  })
+}
 
 const karutaUID = '646937666251915264'; //karuta bot id
 
 let tracking;
 let tempBanned;
-
 const wishlistExpire = new EmbedBuilder()
   .setColor(0xeed202)
   .setDescription('** The wishlisted drop is expiring in 5 seconds. If the wishlister has not grabbed it yet, please grab the card for them. **')
 
-client.once("ready", () => {
+
+client.once(Events.ClientReady, () => {
   console.log(`Ready! Logged in as ${client.user.tag}`);
-  tracking = JSON.parse(fs.readFileSync('./track.json'));
-  tempBanned = JSON.parse(fs.readFileSync('./temp-banned.json'));
+  tracking = JSON.parse(fs.readFileSync('./files/track.json'));
+  tempBanned = JSON.parse(fs.readFileSync('./files/temp-banned.json'));
 });
 
-// client.on("guildMemberUpdate", (member) => {
-//   console.log(member.user.id);
-//   console.log('Has roles:');
-//   console.log(member.roles.cache);
-// });
+client.on(Events.InteractionCreate, async interaction => {
+  console.log(interaction);
+  
+	if (!interaction.isChatInputCommand()) return;
+
+	const command = client.commands.get(interaction.commandName);
+
+	if (!command) return;
+
+	try {
+		await command.execute(interaction);
+	} catch (error) {
+		console.error(error);
+		await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+	}
+});
 
 client.on("messageCreate", (message) => {
+  console.log('writing in a server...');
   let trackedChannels = Object.keys(tracking);
   
   // Wishlist Messaging
@@ -102,14 +118,10 @@ client.on("messageCreate", (message) => {
   if(message.author.id === karutaUID && trackedChannels.includes(message.channelId)){
     console.log('Looking at a tracked channel ' + message.channelId);
     const channel = message.client.channels.cache.find(channel => channel.id);
-    // && message.content.includes('dropping')
     if((tracking[message.channelId].event === 'vday')){
       console.log('Vday tracking on...');
         
       const filter = (reaction, user) => {
-        // console.log(user.id);
-        // console.log(karutaUID);
-        // console.log(user.id === karutaUID);
         return (['🌼','🌹','💐','🌻','🌷'].includes(reaction.emoji.name) && user.id === karutaUID);
       };
         
@@ -145,27 +157,9 @@ client.on("messageCreate", (message) => {
         console.log('All reactions loaded');
       });
     }
-
-    // && message.content.includes('A card from your wishlist is dropping!'
-//     if(tracking[message.channelId].wishlist === 'enabled' && message.content.includes('A card from your wishlist is dropping')){
-//       setTimeout(() => {
-//         const filter = (reaction) => {
-//           return ['1️⃣','2️⃣','3️⃣','4️⃣'].includes(reaction.emoji.name);
-//         };
-        
-//         message.awaitReactions({ filter, max: 4, time: 5500, errors: ['time'] })
-//           .then(collected => console.log(collected))
-//           .catch(collected => {
-//             for(let i=0; i<collected.keys.length;i++){
-//               // do nothing
-//             }
-//           });
-//       }, 65000);
-//     }
   }
 });
 
-// Login to Discord with your client's token
 client.login(token);
 
 // Create an express app
@@ -238,6 +232,13 @@ app.post("/interactions", async function (req, res) {
 
     if (name === "track") {
       let channel = req.body.channel_id;
+      let server = req.body.guild_id;
+//       let trackedServers = Object.keys(tracking);
+      
+//       for(let i = 0; i<trackedServers.length; i++){
+        
+//       }
+      
       let trackedChannels = Object.keys(tracking);
       
       // No filter selected; return values for this channel
@@ -367,7 +368,7 @@ app.post("/interactions", async function (req, res) {
       }
       
       const jsonString = JSON.stringify(tracking, null, 2); // write to file
-      fs.writeFile('./track.json', jsonString, err => {
+      fs.writeFile('./files/track.json', jsonString, err => {
         if (err) return console.log(err);
       });
             
@@ -379,27 +380,6 @@ app.post("/interactions", async function (req, res) {
       });
     }
 
-    // "custom report" command
-    //     if (name === 'report') {
-    //       let ftUserId = req.body.data.options[0].value;
-    //       ftUserId = client.users.fetch(ftUserId);
-    //       console.log(req.body.guild_id)
-    //       const crewMember = client.fetchGuildPreview(req.body.guild_id);
-    //       console.log(crewMember);
-
-    //       ftUserId.then(value => {
-
-    //         console.log(value);
-
-    //         return res.send({
-    //         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-    //         data: {
-    //           content: 'Are you sure you want to report ' + value.username + '?',
-    //         }
-    //       });
-
-    //       });
-    //     }
     else {
       
       return res.send({
@@ -414,10 +394,4 @@ app.post("/interactions", async function (req, res) {
 
 app.listen(PORT, () => {
   console.log("Listening on port", PORT);
-  // Check if guild commands from commands.json are installed (if not, install them)
-  HasGuildCommands(process.env.APP_ID, process.env.GUILD_ID, [
-    EMOTIONAL_SUPPORT_COMMAND,
-    PAT_COMMAND,
-    TRACK_COMMAND,
-  ]);
 });
