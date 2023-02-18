@@ -1,9 +1,37 @@
+import express from "express";
+import {
+  InteractionType,
+  InteractionResponseType,
+  InteractionResponseFlags,
+  MessageComponentTypes,
+  ButtonStyleTypes,
+} from "discord-interactions";
+import {
+  VerifyDiscordRequest,
+  DiscordRequest,
+} from "./utils.js";
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+import { createRequire } from "module"; // Bring in the ability to create the 'require' method
+const require = createRequire(import.meta.url); // construct the require method
+
 const fs = require('node:fs');
-const path = require('node:path');
-const { Client, Collection, Events, GatewayIntentBits, EmbedBuilder } = require('discord.js');
-const { token } = require('./config.json');
+const {
+  Client,
+  Events,
+  Collection,
+  GatewayIntentBits,
+  IntentsBitField,
+  EmbedBuilder,
+  SlashCommandBuilder,
+} = require("discord.js");
+const { token } = require("./config.json");
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 client.commands = new Collection();
 const commandsPath = path.join(__dirname, 'commands');
@@ -11,8 +39,12 @@ const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('
 
 for (const file of commandFiles) {
 	const filePath = path.join(commandsPath, file);
-	const command = require(filePath);
-	client.commands.set(command.data.name, command);
+	//const command = require(filePath);
+  (async() => {
+    const command = await import(filePath);
+    console.log(command);
+    client.commands.set(command.data.name, command);
+  })
 }
 
 const karutaUID = '646937666251915264'; //karuta bot id
@@ -129,3 +161,237 @@ client.on("messageCreate", (message) => {
 });
 
 client.login(token);
+
+// Create an express app
+const app = express();
+// Get port, or default to 3000
+const PORT = process.env.PORT || 3000;
+// Parse request body and verifies incoming requests using discord-interactions package
+app.use(express.json({ verify: VerifyDiscordRequest(process.env.PUBLIC_KEY) }));
+
+/**
+ * Interactions endpoint URL where Discord will send HTTP requests
+ */
+app.post("/interactions", async function (req, res) {
+  // Interaction type and data
+  const { type, id, data } = req.body;
+
+  /**
+   * Handle verification requests
+   */
+  if (type === InteractionType.PING) {
+    return res.send({ type: InteractionResponseType.PONG });
+  }
+
+  /**
+   * Handle slash command requests
+   * See https://discord.com/developers/docs/interactions/application-commands#slash-commands
+   */
+  if (type === InteractionType.APPLICATION_COMMAND) {
+    const { name } = data;
+
+    //console.log(req.body);
+
+    // "emotionalsupport" guild command
+    if (name === "emotionalsupport") {
+      // Send a message into the channel where command was triggered from
+      let nickname = req.body.member.nick
+        ? req.body.member.nick
+        : req.body.member.user.username;
+
+      return res.send({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          content: "There there " + nickname + ", everything will be okay.",
+        },
+      });
+    }
+
+    // "pat" guild command
+    if (name === "pat") {
+      // Send a message into the channel where command was triggered from
+
+      let nickname = req.body.member.nick
+        ? req.body.member.nick
+        : req.body.member.user.username;
+      const description =
+        "There there " + nickname + ", everything will be okay.";
+
+      const esEmbed = new EmbedBuilder()
+        .setColor(0xc55000)
+        .setTitle(description)
+        .setImage("https://i.imgur.com/RYg23Nz.gif");
+
+      return res.send({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          embeds: [esEmbed],
+        },
+      });
+    }
+
+    if (name === "track") {
+      let channel = req.body.channel_id;
+      let server = req.body.guild_id;
+//       let trackedServers = Object.keys(tracking);
+      
+//       for(let i = 0; i<trackedServers.length; i++){
+        
+//       }
+      
+      let trackedChannels = Object.keys(tracking);
+      
+      // No filter selected; return values for this channel
+      if("options" in req.body.data === false){
+        
+        if(trackedChannels.includes(channel)){
+          let returnMessage = 'This channel is currently being tracked for: \n > Event: ';
+          if(tracking[channel].event === 'vday'){
+            returnMessage += '`Valentine\'s Day`';
+          } else {
+            returnMessage += '`'+tracking[channel].event+'`';
+          }
+          returnMessage += "\n > Wishlist Warning: `"+tracking[channel].wishlist+'`';
+          if(tracking[channel].testing === 'enabled'){
+            returnMessage += "\n > Testing Channel: `"+tracking[channel].testing+'`';
+          }
+          return res.send({
+            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+            data: {
+              content: returnMessage,
+            },
+          });
+        } else {
+          return res.send({
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          data: {
+            content: "This channel has never been tracked before.",
+          },
+        });
+        }
+      }
+      
+      // No values by default
+      let event = "none";
+      let wishlist = "disabled";
+      let eventChange = false;
+      let wlChange = false;
+      let testing = "disabled";
+      let testingChange = false;
+      
+      for(let i = 0; i < req.body.data.options.length; i++){
+
+        let filter = req.body.data.options[i].name;
+
+        switch(filter) {
+          case 'event':
+            event = req.body.data.options[i].value;
+            console.log('Tracking event: ' + event);
+            eventChange = true;
+            break;
+          case 'wishlist':
+            wishlist = req.body.data.options[i].value;
+            console.log('Wishlist tracking: ' + wishlist);
+            wlChange = true;
+            break;
+          case 'testing':
+            testing = req.body.data.options[i].value;
+            console.log('Testing tracking: ' + testing);
+            testingChange = true;
+            break;
+          default:
+            console.log('No filter match');
+            return res.send({
+              type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+              data: {
+                content: "Invalid Filter",
+              },
+            });
+        }
+      }
+      
+      if (trackedChannels.includes(channel)){
+        // The channel is already being tracked - Just update the values
+        if(eventChange){
+          if (event === tracking[channel].event){
+             console.log("Event specified is already being tracked; No change");
+            // Event specified is already being tracked; No change
+            eventChange = false;
+          } else {
+            // Update event to new setting
+            console.log("Update event to new setting");
+            tracking[channel].event = event;
+          }
+        }
+        if(wlChange){
+          if (wishlist === tracking[channel].wishlist){
+            // Wishlist setting already set
+            console.log("No change to wishlist warning setting");
+            wlChange = false;
+          } else {
+            // Update wishlist setting
+            console.log("Update wishlist warning setting");
+            tracking[channel].wishlist = wishlist;
+          }
+        }
+        if(testing === "enabled"){
+          if (testing === tracking[channel].testing){
+            // Testing setting already set
+            testingChange = false;
+            console.log("No change to wishlist warning setting");
+          } else {
+            // Update wishlist setting
+            console.log("Update testing setting");
+            tracking[channel].testing = testing;
+          }
+        }
+      } else {
+        // The channel is not yet being tracked - Add the values
+        tracking[channel] = {
+          "event": event,
+          "wishlist": wishlist,
+          "testing": testing
+        }
+      }
+      
+      let returnMessage;
+      if (wlChange && eventChange){
+        returnMessage = "The settings for event and wishlist tracking have been updated for this channel.";
+      } else if(wlChange) {
+        returnMessage = "The settings for wishlist warnings have been updated for this channel.";
+      } else if(eventChange){
+        returnMessage = "The settings for event tracking has been updated for this channel.";
+      } else if(testingChange){
+        returnMessage = "The settings for testing has been updated for this channel.";
+      } else {
+        returnMessage = "Tracking settings for this channel already match the specified settings.";
+      }
+      
+      const jsonString = JSON.stringify(tracking, null, 2); // write to file
+      fs.writeFile('./files/track.json', jsonString, err => {
+        if (err) return console.log(err);
+      });
+            
+      return res.send({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          content: returnMessage,
+        },
+      });
+    }
+
+    else {
+      
+      return res.send({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          content: "Gude doesn't know what you want. Sorry!",
+        },
+      });
+    }
+  }
+});
+
+app.listen(PORT, () => {
+  console.log("Listening on port", PORT);
+});

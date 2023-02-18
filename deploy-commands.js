@@ -1,6 +1,6 @@
-const { REST, Routes } = require('discord.js');
-const { clientId, guildId, token } = require('./config.json');
-const fs = require('node:fs');
+import { REST, Routes } from 'discord.js';
+import { clientId, guildId, token } from './config.json';
+import fs from 'node:fs';
 
 const commands = [];
 // Grab all the command files from the commands directory you created earlier

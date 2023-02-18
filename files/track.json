@@ -13,5 +13,10 @@
     "event": "vday",
     "wishlist": "enabled",
     "testing": "enabled"
+  },
+  "1076167508689698958": {
+    "event": "none",
+    "wishlist": "enabled",
+    "testing": "disabled"
   }
 }
