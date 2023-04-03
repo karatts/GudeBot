@@ -1,5 +1,7 @@
 import { REST, Routes } from 'discord.js';
-import { clientId, guildId, token } from './config.json';
+import { createRequire } from "module"; // Bring in the ability to create the 'require' method
+const require = createRequire(import.meta.url); // construct the require method
+const { clientId, guildId, token } = require('./config.json');
 import fs from 'node:fs';
 
 const commands = [];

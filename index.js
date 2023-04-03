@@ -13,6 +13,8 @@ import {
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+import { emotionalSupportResponse, patEmbed } from "./command-logic.js";
+
 import { createRequire } from "module"; // Bring in the ability to create the 'require' method
 const require = createRequire(import.meta.url); // construct the require method
 
@@ -26,9 +28,18 @@ const {
   EmbedBuilder,
   SlashCommandBuilder,
 } = require("discord.js");
-const { token } = require("./config.json");
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildMessageReactions
+  ],
+});
+
+const { token } = require("./config.json");
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -55,6 +66,10 @@ const wishlistExpire = new EmbedBuilder()
   .setColor(0xeed202)
   .setDescription('** The wishlisted drop is expiring in 5 seconds. If the wishlister has not grabbed it yet, please grab the card for them. **')
 
+// function timeCheck(){
+//   console.log('checking');
+// }
+// setTimeout(timeCheck, 100);
 
 client.once(Events.ClientReady, () => {
   console.log(`Ready! Logged in as ${client.user.tag}`);
@@ -80,7 +95,9 @@ client.on(Events.InteractionCreate, async interaction => {
 });
 
 client.on("messageCreate", (message) => {
-  console.log('writing in a server...');
+  // console.log('The time is '+ message.createdTimestamp);
+  // console.log(message);
+  //console.log('writing in a server...');
   let trackedChannels = Object.keys(tracking);
   
   // Wishlist Messaging
@@ -192,40 +209,26 @@ app.post("/interactions", async function (req, res) {
 
     //console.log(req.body);
 
-    // "emotionalsupport" guild command
+    // basic "emotionalsupport" guild command - text response
     if (name === "emotionalsupport") {
-      // Send a message into the channel where command was triggered from
-      let nickname = req.body.member.nick
-        ? req.body.member.nick
-        : req.body.member.user.username;
-
       return res.send({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
-          content: "There there " + nickname + ", everything will be okay.",
+          content: emotionalSupportResponse(req.body.member),
         },
       });
     }
 
-    // "pat" guild command
-    if (name === "pat") {
-      // Send a message into the channel where command was triggered from
-
-      let nickname = req.body.member.nick
-        ? req.body.member.nick
-        : req.body.member.user.username;
-      const description =
-        "There there " + nickname + ", everything will be okay.";
-
-      const esEmbed = new EmbedBuilder()
-        .setColor(0xc55000)
-        .setTitle(description)
-        .setImage("https://i.imgur.com/RYg23Nz.gif");
-
+    // basic "pat" guild command - embed response with random pat
+    if (name === "pat") {      
+      let patEmbedPieces = patEmbed(req.body.member);
+      let embed = patEmbedPieces.embed;
+      embed.setImage(patEmbedPieces.image);
+      
       return res.send({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
-          embeds: [esEmbed],
+          embeds: [embed],
         },
       });
     }
@@ -233,11 +236,6 @@ app.post("/interactions", async function (req, res) {
     if (name === "track") {
       let channel = req.body.channel_id;
       let server = req.body.guild_id;
-//       let trackedServers = Object.keys(tracking);
-      
-//       for(let i = 0; i<trackedServers.length; i++){
-        
-//       }
       
       let trackedChannels = Object.keys(tracking);
       

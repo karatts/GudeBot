@@ -1,4 +1,4 @@
-// import { SlashCommandBuilder } from 'discord.js';
+import { SlashCommandBuilder } from 'discord.js';
 
 // module.exports = {
 //   data: new SlashCommandBuilder()
@@ -6,12 +6,16 @@
 //     .setDescription('pat command')
 // }
 
-
-import { capitalize, DiscordRequest } from './utils.js';
-import { SlashCommandBuilder } from '@discordjs/builders';
-
 export const PAT_COMMAND = {
   name: 'pat',
   description: 'pat command',
   type: 1,
+  options: [
+    {
+      "type": 6,
+      "name": "user",
+      "description": "User you want to pat",
+      "required": false,
+    },
+  ]
 };
